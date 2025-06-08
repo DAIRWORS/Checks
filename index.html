@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор товарных чеков</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .logo-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo-preview, .stamp-preview {
+            max-width: 200px;
+            max-height: 100px;
+            margin: 10px auto;
+            display: block;
+        }
+        .auth-screen {
+            text-align: center;
+            margin-top: 50px;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .auth-screen input {
+            padding: 10px;
+            margin: 15px auto;
+            width: 200px;
+            display: block;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .auth-screen button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .error {
+            color: red;
+            margin-top: 15px;
+        }
+        .app-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .logout-btn {
+            background-color: #f44336;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .product-category {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+        }
+        .product-item .add-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 5px 10px;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+        button {
+            padding: 8px 16px;
+            margin-right: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            border: none;
+        }
+        .remove-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        .total-section {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .download-btn {
+            background-color: #2196F3;
+            color: white;
+        }
+        .discount-options, .payment-type {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .discount-option, .payment-option {
+            padding: 8px 12px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .discount-option.selected, .payment-option.selected {
+            background: #4CAF50;
+            color: white;
+        }
+        .signature-area {
+            margin-top: 100px;
+            text-align: center;
+            position: relative;
+        }
+        .receipt-items-container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            background: #f9f9f9;
+        }
+
+        .receipt-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 10px;
+        }
+
+        .receipt-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .product-info {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        .product-name {
+            flex: 3;
+            margin-right: 10px;
+        }
+
+        .product-quantity {
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            margin-left: 10px;
+        }
+
+        .quantity-btn {
+            padding: 2px 8px;
+            margin: 0 5px;
+            font-size: 14px;
+            background-color: #ddd;
+            color: #333;
+        }
+
+        .product-price {
+            flex: 1;
+            text-align: right;
+            margin-right: 20px;
+        }
+
+        .product-total {
+            flex: 1;
+            text-align: right;
+        }
+
+        .empty-cart {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+        }
+
+        .date-edit {
+            display: flex;
+            align-items: center;
+        }
+
+        .date-edit button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        
+        .history-panel {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background: #f9f9f9;
+        }
+        
+        .history-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .history-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .history-actions button {
+            padding: 3px 8px;
+            font-size: 12px;
+        }
+        
+        .history-buttons {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.min.js"></script>
+    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.worker.min.js';</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Экран авторизации -->
+        <div v-if="!authenticated" class="auth-screen">
+            <h1>Вход в систему</h1>
+            <input 
+                type="password" 
+                v-model="password" 
+                placeholder="Введите пароль"
+                @keyup.enter="login"
+            >
+            <button @click="login">Войти</button>
+            <p v-if="authError" class="error">{{ authError }}</p>
+        </div>
+
+        <!-- Основной интерфейс -->
+        <div v-else class="app-container">
+            <header>
+                <h1>Генератор товарных чеков</h1>
+                <button @click="logout" class="logout-btn">Выйти</button>
+            </header>
+
+            <div class="settings-panel">
+                <h2>Настройки компании</h2>
+                
+                <div class="form-group">
+                    <label>Логотип компании:</label>
+                    <input type="file" accept="image/*" @change="handleLogoUpload">
+                    <div class="logo-container">
+                        <img :src="company.logoData" class="logo-preview" v-if="company.logoData">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Individual Predprinimatel:</label>
+                    <input v-model="company.fullName" type="text">
+                </div>
+                
+                <div class="form-group">
+                    <label>INN:</label>
+                    <input v-model="company.taxId" type="text">
+                </div>
+                
+                <div class="form-group">
+                    <label>Adress:</label>
+                    <input v-model="company.calculationAddress" type="text">
+                </div>
+                
+                <div class="form-group">
+                    <label>Nalogooblagenie:</label>
+                    <input v-model="company.taxSystem" type="text" value="Патентная система налогообложения">
+                </div>
+                
+                <div class="form-group">
+                    <label>Печать компании:</label>
+                    <input type="file" accept="image/*" @change="handleStampUpload">
+                    <div class="logo-container">
+                        <img :src="company.stampData" class="stamp-preview" v-if="company.stampData">
+                    </div>
+                </div>
+                
+                <button @click="saveCompanySettings">Сохранить настройки</button>
+            </div>
+
+            <div class="receipt-form">
+                <h2>Создать чек</h2>
+                
+                <div class="form-group">
+                    <label>Номер чека:</label>
+                    <input v-model="receipt.number" type="text">
+                </div>
+                
+                <div class="form-group">
+                    <label>Дата:</label>
+                    <div class="date-edit">
+                        <input v-model="receipt.date" type="text" placeholder="ДД.ММ.ГГГГ">
+                        <button @click="setCurrentDate">Сегодня</button>
+                        <button @click="editDate">Изменить</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Время расчета (Оренбургское):</label>
+                    <input v-model="receipt.time" type="time">
+                </div>
+                
+                <div class="form-group">
+                    <label>Телефон клиента:</label>
+                    <input 
+                        v-model="formattedPhone"
+                        type="tel"
+                        placeholder="+7 (___) ___-__-__"
+                        @input="formatPhone"
+                        @keydown="enforceFormat"
+                        maxlength="11"
+                    >
+                </div>
+                
+                <h3>Товары:</h3>
+                
+                <div class="product-category" v-for="(category, catIndex) in productCategories" :key="catIndex">
+                    <h4 @click="toggleCategory(catIndex)" style="cursor: pointer">
+                        {{ category.name }} {{ category.expanded ? '▼' : '►' }}
+                    </h4>
+                    
+                    <div v-if="category.expanded">
+                        <div v-for="(product, prodIndex) in category.products" :key="prodIndex" class="product-item">
+                            <div>{{ product.name }}</div>
+                            <div>
+                                Вес: 
+                                <select v-model="product.selectedWeightIndex" @change="updateProductPrice(product)">
+                                    <option v-for="(weight, index) in product.weights" :value="index">
+                                        {{ weight.label }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div>
+                                Итоговая цена: 
+                                <input type="number" 
+                                    v-model="product.currentPrice"
+                                    @input="updateBasePriceFromTotal($event, product)"
+                                    style="width: 100px;">
+                                rub
+                            </div>
+                            <button 
+                                @click.stop="addProductToReceipt(product)" 
+                                class="add-btn"
+                                :disabled="!product.weights || product.weights.length === 0"
+                            >
+                                Добавить в чек
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3>Товары в чеке:</h3>
+                <div class="receipt-items-container">
+                    <div class="receipt-item" v-for="(product, index) in receipt.products" :key="index">
+                        <div class="product-info">
+                            <div class="product-name"><strong>{{ product.name }}</strong></div>
+                            <div class="product-quantity">
+                                Кол-во: 
+                                <div class="quantity-control">
+                                    <button @click.stop="decreaseQuantity(index)" class="quantity-btn">-</button>
+                                    {{ product.quantity }}
+                                    <button @click.stop="increaseQuantity(index)" class="quantity-btn">+</button>
+                                </div>
+                                {{ product.unit }}
+                            </div>
+                            <div class="product-price">Цена: {{ formatPrice(product.price) }} ₽</div>
+                            <div class="product-total">Сумма: {{ formatPrice(product.price * product.quantity) }} ₽</div>
+                        </div>
+                        <button @click="removeProduct(index)" class="remove-btn">× Удалить</button>
+                    </div>
+                    
+                    <div v-if="receipt.products.length === 0" class="empty-cart">
+                        Товары не добавлены
+                    </div>
+                </div>
+
+                
+                
+                <div class="form-group">
+                    <label>Скидка:</label>
+                    <div class="discount-options">
+                        <div class="discount-option" 
+                             :class="{selected: receipt.discount === 0}"
+                             @click="receipt.discount = 0">0%</div>
+                        <div class="discount-option" 
+                             :class="{selected: receipt.discount === 5}"
+                             @click="receipt.discount = 5">5%</div>
+                        <div class="discount-option" 
+                             :class="{selected: receipt.discount === 10}"
+                             @click="receipt.discount = 10">10%</div>
+                        <div class="discount-option" 
+                             :class="{selected: receipt.discount === 20}"
+                             @click="receipt.discount = 20">20%</div>
+                        <input type="number" v-model="receipt.customDiscount" 
+                               @change="applyCustomDiscount" placeholder="Другая %" 
+                               style="width: 80px; padding: 8px;">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Признак расчета:</label>
+                    <div class="payment-type">
+                        <div class="payment-option" 
+                             :class="{selected: receipt.paymentType === 'приход'}"
+                             @click="receipt.paymentType = 'приход'">Приход</div>
+                        <div class="payment-option" 
+                             :class="{selected: receipt.paymentType === 'возврат прихода'}"
+                             @click="receipt.paymentType = 'возврат прихода'">Возврат прихода</div>
+                        <div class="payment-option" 
+                             :class="{selected: receipt.paymentType === 'расход'}"
+                             @click="receipt.paymentType = 'расход'">Расход</div>
+                        <div class="payment-option" 
+                             :class="{selected: receipt.paymentType === 'возврат расхода'}"
+                             @click="receipt.paymentType = 'возврат расхода'">Возврат расхода</div>
+                    </div>
+                </div>
+                
+                <!--<div class="total-section">
+                    <h3>Итого: {{ receipt.total.toFixed(2) }} ₽</h3>
+                    <p v-if="receipt.discount > 0">Скидка: {{ receipt.discount }}% ({{ discountAmount.toFixed(2) }} ₽)</p>
+                    <h3>К оплате: {{ finalAmount.toFixed(2) }} ₽</h3>
+                    <p>{{ amountInWords }}</p>
+                </div>-->
+                
+                <!--<div class="signature-area">
+                    <p>Генеральный директор: _________________</p>
+                    <img :src="company.stampData" class="stamp-preview" v-if="company.stampData" style="max-height: 80px;">
+                </div>-->
+                
+                <button @click="saveReceipt" class="download-btn">Сохранить чек</button>
+            </div>
+            
+            <div class="history-panel" v-if="receiptHistory.length > 0">
+                <h3>История чеков</h3>
+                <div class="history-item" v-for="(receipt, index) in receiptHistory" :key="index">
+                    <div>
+                        <strong>Чек №{{ receipt.number }}</strong> - {{ receipt.date }} {{ receipt.time }}
+                    </div>
+                    <div class="history-actions">
+                        <button @click="downloadHistoryReceipt(index, 'pdf')" class="download-btn">PDF</button>
+                        <button @click="downloadHistoryReceipt(index, 'png')" class="download-btn">PNG</button>
+                        <button @click="deleteReceipt(index)" class="remove-btn">Удалить</button>
+                    </div>
+                </div>
+                <div class="history-buttons">
+                    <button @click="exportAllReceipts('pdf')" class="download-btn">Экспорт всех (PDF)</button>
+                    <button @click="exportAllReceipts('png')" class="download-btn">Экспорт всех (PNG)</button>
+                    <button @click="deleteAllReceipts" class="remove-btn">Удалить все чеки</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed } = Vue;
+
+        createApp({
+            setup() {
+                // Состояние аутентификации
+                const authenticated = ref(false);
+                const password = ref('');
+                const authError = ref('');
+                const correctPassword = 'admin123';
+
+                // Данные компании
+                const company = ref({
+                    logoData: 'icons/icon-192x192.png',
+                    stampData: 'icons/shtamp.png',
+                    fullName: 'VELICHESTVO PIZZA',
+                    taxId: '561001215161',
+                    calculationAddress: 'Orenburg, Zagorodnoe shosse 24',
+                    taxSystem: 'CNP : NPO'
+                });
+
+                // Функция для конвертации PDF в PNG
+                const convertPdfToPng = async (pdfBlob) => {
+                    try {
+                        // Загружаем PDF документ
+                        const loadingTask = pdfjsLib.getDocument({data: pdfBlob});
+                        const pdf = await loadingTask.promise;
+                        
+                        // Берем первую страницу
+                        const page = await pdf.getPage(1);
+                        
+                        // Устанавливаем масштаб для качественного изображения
+                        const viewport = page.getViewport({scale: 2.0});
+                        
+                        // Создаем canvas для рендеринга
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+                        
+                        // Рендерим страницу PDF в canvas
+                        await page.render({
+                            canvasContext: context,
+                            viewport: viewport
+                        }).promise;
+                        
+                        // Конвертируем canvas в PNG
+                        return new Promise((resolve) => {
+                            canvas.toBlob((blob) => {
+                                resolve(blob);
+                            }, 'image/png');
+                        });
+                    } catch (error) {
+                        console.error('Ошибка при конвертации PDF в PNG:', error);
+                        throw error;
+                    }
+                };
+
+
+                // Категории товаров
+                const productCategories = ref([
+                    {
+                        name: 'Пиццы',
+                        expanded: false,
+                        products: [
+                            { 
+                                name: '1. Pizza firmennaya "Italianskaya"', 
+                                basePrice: 700, 
+                                weights: [
+                                    {value: 0.7, label: '700g'},
+                                    {value: 1, label: '1000g'},
+                                    {value: 1.5, label: '1500g'},
+                                    {value: 1.7, label: '1700g'}
+                                ], 
+                                selectedWeightIndex: 0, 
+                                currentPrice: 490, // 700 * 0.7
+                                options: ['Двойной сыр'] 
+                            },
+                            { 
+                                name: '2. Pizza "Klassika"', 
+                                basePrice: 700, 
+                                weights: [
+                                    {value: 0.7, label: '700g'},
+                                    {value: 1, label: '1000g'},
+                                    {value: 1.5, label: '1500g'},
+                                    {value: 1.7, label: '1700g'}
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 490, // 700 * 0.7
+                                options: ['Двойной сыр'] 
+                            },
+                            { 
+                                name: '3. Pizza "Po-gryzinski"', 
+                                basePrice: 700, 
+                                weights: [
+                                    {value: 0.7, label: '700g'},
+                                    {value: 1, label: '1000g'},
+                                    {value: 1.5, label: '1500g'}
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 490, // 700 * 0.7
+                                options: ['Без сухарей', 'Двойной сыр'] 
+                            },
+                            { 
+                                name: '4. Pizza "Assorti"', 
+                                basePrice: 550, 
+                                weights: [
+                                    {value: 0.7, label: '700g'},
+                                    {value: 1, label: '1000g'},
+                                    {value: 1.5, label: '1500g'}
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 302.5, // 550 * 0.55
+                                options: ['Перемешать'] 
+                            },
+                            { 
+                                name: '5. Pizza "Assorti-Mix"', 
+                                basePrice: 550, 
+                                weights: [
+                                    {value: 0.7, label: '700g'},
+                                    {value: 1, label: '1000g'},
+                                    {value: 1.5, label: '1500g'},
+                                    {value: 1.7, label: '1700g'}
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 302.5, // 550 * 0.55
+                                options: ['Перемешать'] 
+                            },
+                            { 
+                                name: '6. Pizza firmennaya "Generalskaya"', 
+                                basePrice: 550, 
+                                weights: [
+                                    {value: 0.7, label: '700g'},
+                                    {value: 1, label: '1000g'},
+                                    {value: 1.5, label: '1500g'},
+                                    {value: 1.7, label: '1700g'}
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 302.5, // 550 * 0.55
+                                options: ['Перемешать'] 
+                            },
+                            { 
+                                name: '7. Pizza firmennaya "Kremlevskaya"', 
+                                basePrice: 550, 
+                                weights: [
+                                    {value: 0.7, label: '700g'},
+                                    {value: 1, label: '1000g'},
+                                    {value: 1.4, label: '1400g'},
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 302.5, // 550 * 0.55
+                                options: ['Перемешать'] 
+                            },
+                            { 
+                                name: '8. Pizza firmennaya "Stolichnaya"', 
+                                basePrice: 550, 
+                                weights: [
+                                    {value: 0.7, label: '700g'},
+                                    {value: 1, label: '1000g'},
+                                    {value: 1.4, label: '1400g'},
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 302.5, // 550 * 0.55
+                                options: ['Перемешать'] 
+                            },
+                            { 
+                                name: '9. Pizza firmennaya "Imperatorskaya"', 
+                                basePrice: 550, 
+                                weights: [
+                                    {value: 0.7, label: '700g'},
+                                    {value: 1, label: '1000g'},
+                                    {value: 1.5, label: '1500g'},
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 302.5, // 550 * 0.55
+                                options: ['Перемешать'] 
+                            },
+                            { 
+                                name: '10. Pizza "Pepperoni"', 
+                                basePrice: 550, 
+                                weights: [
+                                    {value: 0.6, label: '600g'},
+                                    {value: 0.9, label: '900g'},
+                                    {value: 1.3, label: '1300g'}
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 302.5, // 550 * 0.55
+                                options: ['Перемешать'] 
+                            },
+                            { 
+                                name: '11. Pizza "Vegetarianskaya"', 
+                                basePrice: 550, 
+                                weights: [
+                                    {value: 0.7, label: '700g'},
+                                    {value: 1, label: '1000g'},
+                                    {value: 1.5, label: '1500g'},
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 302.5, // 550 * 0.55
+                                options: ['Перемешать'] 
+                            },
+                            { 
+                                name: '12. Pizza "Dary Morya"', 
+                                basePrice: 550, 
+                                weights: [
+                                    {value: 0.7, label: '700g'},
+                                    {value: 1, label: '1000g'},
+                                    {value: 1.5, label: '1500g'},
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 302.5, // 550 * 0.55
+                                options: ['Перемешать'] 
+                            },
+                            { 
+                                name: '13. Pizza "Pikantnaya"', 
+                                basePrice: 550, 
+                                weights: [
+                                    {value: 0.7, label: '700g'},
+                                    {value: 1, label: '1000g'},
+                                    {value: 1.5, label: '1500g'},
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 302.5, // 550 * 0.55
+                                options: ['Перемешать'] 
+                            },
+                            { 
+                                name: '14. Pizza "Margarita"', 
+                                basePrice: 550, 
+                                weights: [
+                                    {value: 0.6, label: '600g'},
+                                    {value: 0.9, label: '900g'},
+                                    {value: 1.3, label: '1300g'},
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 302.5, // 550 * 0.55
+                                options: ['Перемешать'] 
+                            },
+                            { 
+                                name: '15. Pizza "Syrnaya"', 
+                                basePrice: 550, 
+                                weights: [
+                                    {value: 0.7, label: '700g'},
+                                    {value: 1, label: '1000g'},
+                                    {value: 1.5, label: '1500g'},
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 302.5, // 550 * 0.55
+                                options: ['Перемешать'] 
+                            },
+                            { 
+                                name: '16. Pizza "Zhyletta"', 
+                                basePrice: 550, 
+                                weights: [
+                                    {value: 0.7, label: '700g'},
+                                    {value: 1, label: '1000g'},
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 302.5, // 550 * 0.55
+                                options: ['Перемешать'] 
+                            },
+                            { 
+                                name: '17. Pizza "Detskaya"', 
+                                basePrice: 550, 
+                                weights: [
+                                   {value: 0.6, label: '600g'},
+                                    {value: 0.9, label: '900g'},
+                                    {value: 1.3, label: '1300g'},
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 302.5, // 550 * 0.55
+                                options: ['Перемешать'] 
+                            },
+                            { 
+                                name: '18. Pizza "Stydencheskaya"', 
+                                basePrice: 550, 
+                                weights: [
+                                    {value: 0.7, label: '700g'},
+                                    {value: 1, label: '1000g'},
+                                    {value: 1.6, label: '1600g'},
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 302.5, // 550 * 0.55
+                                options: ['Перемешать'] 
+                            },
+                            { 
+                                name: '19. Pizza "Ceaser" s kyrinym file', 
+                                basePrice: 550, 
+                                weights: [
+                                    {value: 0.7, label: '700g'},
+                                    {value: 1, label: '1000g'},
+                                    {value: 1.5, label: '1500g'},
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 302.5, // 550 * 0.55
+                                options: ['Перемешать'] 
+                            },
+                            { 
+                                name: '20. Pizza "4 syra"', 
+                                basePrice: 550, 
+                                weights: [
+                                    {value: 0.5, label: '550g'}
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 302.5, // 550 * 0.55
+                                options: ['Перемешать'] 
+                            },
+                            { 
+                                name: '21. Pizza "Postnaya"', 
+                                basePrice: 550, 
+                                weights: [
+                                    {value: 0.7, label: '700g'},
+                                    {value: 1, label: '1000g'},
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 302.5, // 550 * 0.55
+                                options: ['Перемешать'] 
+                            },
+                            { 
+                                name: '22. Pizza firmennaya "Gysarskaya"', 
+                                basePrice: 550, 
+                                weights: [
+                                    {value: 0.7, label: '750g'}
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 302.5, // 550 * 0.55
+                                options: ['Перемешать'] 
+                            },
+                            { 
+                                name: '23. Pizza "Posolskaya"', 
+                                basePrice: 550, 
+                                weights: [
+                                    {value: 0.7, label: '750g'}
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 302.5, // 550 * 0.55
+                                options: ['Перемешать'] 
+                            },
+                            { 
+                                name: '24. Pizza "Gavayskaya"', 
+                                basePrice: 550, 
+                                weights: [
+                                    {value: 0.7, label: '700g'}
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 302.5, // 550 * 0.55
+                                options: ['Перемешать'] 
+                            },
+                            { 
+                                name: '25. Pizza "Yaponskiy Motiv"', 
+                                basePrice: 550, 
+                                weights: [
+                                    {value: 0.7, label: '700g'}
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 302.5, // 550 * 0.55
+                                options: ['Перемешать'] 
+                            }
+                        ]
+                    },
+                    {
+                        name: 'Горячее',
+                        expanded: false,
+                        products: [
+                            { 
+                                name: 'Kyrica-gril', 
+                                basePrice: 180, 
+                                weights: [
+                                    {value: 1.1, label: '1.1kg'},
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 800 // 180 * 1.1
+                            },
+                            { 
+                                name: 'Kyrinye krylyshki', 
+                                basePrice: 180, 
+                                weights: [
+                                    {value: 0.6, label: '0.6kg'},
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 800 // 180 * 0.6
+                            },
+                            { 
+                                name: 'Kartofel Fri', 
+                                basePrice: 200, 
+                                weights: [
+                                    {value: 0.1, label: '100g'},
+                                    {value: 0.2, label: '200g'}
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 20 // 200 * 0.1
+                            },
+                            { 
+                                name: 'Lazanya "Mysnaya"', 
+                                basePrice: 400, 
+                                weights: [
+                                    {value: 0.4, label: '400g'}
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 750 // 400 * 0.4
+                            },
+                            { 
+                                name: 'Lzaznya "Kyrinaya"', 
+                                basePrice: 400, 
+                                weights: [
+                                    {value: 0.4, label: '400g'}
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 600 // 400 * 0.4
+                            },
+                            { 
+                                name: 'Lazanya "Gribnaya"', 
+                                basePrice: 400, 
+                                weights: [
+                                    {value: 0.4, label: '400g'}
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 160 // 400 * 0.4
+                            }
+                        ]
+                    },
+                    {
+                        name: 'Салаты',
+                        expanded: false,
+                        products: [
+                            { 
+                                name: 'Salad "Ceaser" s kyricey', 
+                                basePrice: 300, 
+                                weights: [
+                                    {value: 0.3, label: '300g'}
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 400 // 300 * 0.3
+                            },
+                            { 
+                                name: 'Salad "Ceaser" s krevetkami', 
+                                basePrice: 350, 
+                                weights: [
+                                    {value: 0.3, label: '300g'}
+                                ], 
+                                selectedWeightIndex: 0,
+                                currentPrice: 500 // 350 * 0.3
+                            }
+                        ]
+                    }
+                ]);
+
+                // Данные чека
+                const receipt = ref({
+                    number: '001',
+                    date: formatDate(new Date()),
+                    time: getOrenburgTime(),
+                    clientPhone: '',
+                    paymentType: 'приход',
+                    discount: 0,
+                    customDiscount: null,
+                    products: [],
+                    total: 0,
+                    vatAmount: 0
+                });
+                
+                // История чеков
+                const receiptHistory = ref([]);
+
+                // Функция для форматирования даты в ДД.ММ.ГГГГ
+                function formatDate(date) {
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const year = date.getFullYear();
+                    return `${day}.${month}.${year}`;
+                }
+
+                // Функция для получения текущего времени в Оренбурге (UTC+5)
+                function getOrenburgTime() {
+                    const now = new Date();
+                    const orenburgOffset = 5 * 60 * 60 * 1000; // UTC+5 (Оренбург)
+                    const orenburgTime = new Date(now.getTime() + orenburgOffset);
+                    
+                    const hours = orenburgTime.getUTCHours().toString().padStart(2, '0');
+                    const minutes = orenburgTime.getUTCMinutes().toString().padStart(2, '0');
+                    const seconds = orenburgTime.getUTCSeconds().toString().padStart(2, '0');
+                    
+                    return `${hours}:${minutes}:${seconds}`;
+                }
+
+                // Обновление цены продукта при изменении веса или базовой цены
+                const updateProductPrice = (product) => {
+                    const weight = product.weights[product.selectedWeightIndex].value;
+                    product.currentPrice = product.basePrice * weight;
+                };
+
+                // Обновление базовой цены при ручном изменении итоговой цены
+                const updateBasePriceFromTotal = (event, product) => {
+                    const newTotal = parseFloat(event.target.value);
+                    if (isNaN(newTotal)) return;
+                    
+                    const weight = product.weights[product.selectedWeightIndex].value;
+                    product.basePrice = newTotal / weight;
+                    product.currentPrice = newTotal;
+                };
+
+                // Форматирование цены
+                const formatPrice = (price) => {
+                    return parseFloat(price).toFixed(2);
+                };
+
+                // Добавление товара в чек
+                const addProductToReceipt = (product) => {
+                    const weight = product.weights[product.selectedWeightIndex];
+                    const productName = `${product.name} (${weight.label.replace(/\(|\)/g, '')})`;
+                    const price = product.currentPrice;
+
+                    const existingIndex = receipt.value.products.findIndex(
+                        p => p.name === productName && p.price === price
+                    );
+
+                    if (existingIndex >= 0) {
+                        receipt.value.products[existingIndex].quantity += 1;
+                    } else {
+                        receipt.value.products.push({
+                            name: productName,
+                            price: price,
+                            quantity: 1,
+                            unit: 'шт.',
+                            vatRate: '20%',
+                            weight: weight.label
+                        });
+                    }
+
+                    updateReceiptTotal();
+                };
+
+                // Увеличение количества товара
+                const increaseQuantity = (index) => {
+                    receipt.value.products[index].quantity += 1;
+                    updateReceiptTotal();
+                };
+
+                // Уменьшение количества товара
+                const decreaseQuantity = (index) => {
+                    if (receipt.value.products[index].quantity > 1) {
+                        receipt.value.products[index].quantity -= 1;
+                    } else {
+                        receipt.value.products.splice(index, 1);
+                    }
+                    updateReceiptTotal();
+                };
+
+                // Удаление товара
+                const removeProduct = (index) => {
+                    receipt.value.products.splice(index, 1);
+                    updateReceiptTotal();
+                };
+
+                // Обновление общей суммы чека
+                const updateReceiptTotal = () => {
+                    receipt.value.total = receipt.value.products.reduce((sum, item) => {
+                        return sum + (item.price * item.quantity);
+                    }, 0);
+                };
+
+                // Применение пользовательской скидки
+                const applyCustomDiscount = () => {
+                    if (receipt.value.customDiscount !== null && receipt.value.customDiscount >= 0) {
+                        receipt.value.discount = parseFloat(receipt.value.customDiscount);
+                    }
+                };
+
+                // Сумма скидки
+                const discountAmount = computed(() => {
+                    return receipt.value.total * (receipt.value.discount / 100);
+                });
+
+                // Итоговая сумма к оплате
+                const finalAmount = computed(() => {
+                    return receipt.value.total - discountAmount.value;
+                });
+
+                // Сумма прописью
+                const amountInWords = computed(() => {
+                    return numberToWords(finalAmount.value);
+                });
+
+                // Функция для преобразования числа в текст
+                function numberToWords(num) {
+                    const units = ['', 'один', 'два', 'три', 'четыре', 'пять', 'шесть', 'семь', 'восемь', 'девять'];
+                    const teens = ['десять', 'одиннадцать', 'двенадцать', 'тринадцать', 'четырнадцать', 'пятнадцать', 'шестнадцать', 'семнадцать', 'восемнадцать', 'девятнадцать'];
+                    const tens = ['', 'десять', 'двадцать', 'тридцать', 'сорок', 'пятьдесят', 'шестьдесят', 'семьдесят', 'восемьдесят', 'девяносто'];
+                    const hundreds = ['', 'сто', 'двести', 'триста', 'четыреста', 'пятьсот', 'шестьсот', 'семьсот', 'восемьсот', 'девятьсот'];
+                    
+                    num = parseFloat(num.toFixed(2));
+                    const rubles = Math.floor(num);
+                    const kopecks = Math.round((num - rubles) * 100);
+                    
+                    let result = '';
+                    
+                    if (rubles === 0) {
+                        result = 'ноль рублей';
+                    } else {
+                        if (rubles >= 1000) {
+                            result += 'большая сумма ';
+                        } else {
+                            if (rubles >= 100) {
+                                result += hundreds[Math.floor(rubles / 100)] + ' ';
+                            }
+                            
+                            const remainder = rubles % 100;
+                            if (remainder >= 20) {
+                                result += tens[Math.floor(remainder / 10)] + ' ';
+                                if (remainder % 10 > 0) {
+                                    result += units[remainder % 10] + ' ';
+                                }
+                            } else if (remainder >= 10) {
+                                result += teens[remainder - 10] + ' ';
+                            } else if (remainder > 0) {
+                                result += units[remainder] + ' ';
+                            }
+                            
+                            // Правильное склонение рублей
+                            const lastTwo = rubles % 100;
+                            const lastOne = rubles % 10;
+                            
+                            if (lastTwo >= 11 && lastTwo <= 19) {
+                                result += 'рублей ';
+                            } else if (lastOne === 1) {
+                                result += 'рубль ';
+                            } else if (lastOne >= 2 && lastOne <= 4) {
+                                result += 'рубля ';
+                            } else {
+                                result += 'рублей ';
+                            }
+                        }
+                    }
+                    
+                    // Добавляем копейки
+                    if (kopecks > 0) {
+                        if (kopecks >= 20) {
+                            result += tens[Math.floor(kopecks / 10)] + ' ';
+                            if (kopecks % 10 > 0) {
+                                result += units[kopecks % 10] + ' ';
+                            }
+                        } else if (kopecks >= 10) {
+                            result += teens[kopecks - 10] + ' ';
+                        } else if (kopecks > 0) {
+                            result += units[kopecks] + ' ';
+                        }
+                        
+                        // Правильное склонение копеек
+                        const lastTwoKop = kopecks % 100;
+                        const lastOneKop = kopecks % 10;
+                        
+                        if (lastTwoKop >= 11 && lastTwoKop <= 19) {
+                            result += 'копеек';
+                        } else if (lastOneKop === 1) {
+                            result += 'копейка';
+                        } else if (lastOneKop >= 2 && lastOneKop <= 4) {
+                            result += 'копейки';
+                        } else {
+                            result += 'копеек';
+                        }
+                    } else {
+                        result += '00 копеек';
+                    }
+                    
+                    return result;
+                }
+
+                // Установка текущей даты
+                const setCurrentDate = () => {
+                    receipt.value.date = formatDate(new Date());
+                };
+
+                // Редактирование даты
+                const editDate = () => {
+                    const newDate = prompt("Введите дату в формате ДД.ММ.ГГГГ", receipt.value.date);
+                    if (newDate && /^\d{2}\.\d{2}\.\d{4}$/.test(newDate)) {
+                        receipt.value.date = newDate;
+                    } else if (newDate) {
+                        alert("Неверный формат даты. Используйте ДД.ММ.ГГГГ");
+                    }
+                };
+
+                // Обработка загрузки логотипа
+                const handleLogoUpload = (event) => {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        company.value.logoData = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                };
+
+                // Обработка загрузки печати
+                const handleStampUpload = (event) => {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        company.value.stampData = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                };
+
+                // Переключение отображения категории товаров
+                const toggleCategory = (index) => {
+                    productCategories.value[index].expanded = !productCategories.value[index].expanded;
+                };
+
+                // Форматирование телефона
+                const formatPhone = (event) => {
+                    let phone = event.target.value.replace(/\D/g, '');
+                    if (phone.length > 11) phone = phone.substring(0, 11);
+                    
+                    let formatted = '';
+                    if (phone.length > 0) formatted = '+7 (' + phone.substring(1, 4);
+                    if (phone.length > 4) formatted += ') ' + phone.substring(4, 7);
+                    if (phone.length > 7) formatted += '-' + phone.substring(7, 9);
+                    if (phone.length > 9) formatted += '-' + phone.substring(9, 11);
+                    
+                    receipt.value.clientPhone = formatted;
+                };
+
+                // Методы аутентификации
+                const login = () => {
+                    if (!password.value.trim()) {
+                        authError.value = 'Введите пароль';
+                        return;
+                    }
+
+                    if (password.value === correctPassword) {
+                        authenticated.value = true;
+                        authError.value = '';
+                        localStorage.setItem('isAuthenticated', 'true');
+                        loadSavedData();
+                    } else {
+                        authError.value = 'Неверный пароль';
+                        password.value = '';
+                    }
+                };
+
+                const logout = () => {
+                    authenticated.value = false;
+                    password.value = '';
+                    localStorage.removeItem('isAuthenticated');
+                };
+
+                const checkAuth = () => {
+                    if (localStorage.getItem('isAuthenticated') === 'true') {
+                        authenticated.value = true;
+                        loadSavedData();
+                    }
+                };
+
+                // Методы работы с данными
+                const saveCompanySettings = () => {
+                    localStorage.setItem('receiptCompany', JSON.stringify(company.value));
+                    alert('Настройки компании сохранены!');
+                };
+
+                const loadSavedData = () => {
+                    const savedCompany = localStorage.getItem('receiptCompany');
+                    if (savedCompany) {
+                        company.value = JSON.parse(savedCompany);
+                    }
+                    
+                    const savedHistory = localStorage.getItem('receiptHistory');
+                    if (savedHistory) {
+                        receiptHistory.value = JSON.parse(savedHistory);
+                    }
+                };
+                
+                // Сохранение чека в историю     // Сохранение чека в историю
+                const saveReceipt = () => {
+                    if (receipt.value.products.length === 0) {
+                        alert('Добавьте товары в чек перед сохранением');
+                        return;
+                    }
+
+                    // Создаем копию текущего чека для истории
+                    const receiptToSave = JSON.parse(JSON.stringify(receipt.value));
+                    
+                    // Добавляем в историю
+                    receiptHistory.value.unshift(receiptToSave);
+                    
+                    // Сохраняем историю в localStorage
+                    localStorage.setItem('receiptHistory', JSON.stringify(receiptHistory.value));
+                    
+                    // Генерируем PDF
+                    generatePDF(receiptToSave);
+                    
+                    // Сбрасываем текущий чек (кроме номера)
+                    const nextNumber = String(parseInt(receipt.value.number) + 1).padStart(3, '0');
+                    receipt.value = {
+                        number: nextNumber,
+                        date: formatDate(new Date()),
+                        time: getOrenburgTime(),
+                        clientPhone: '',
+                        paymentType: 'приход',
+                        discount: 0,
+                        customDiscount: null,
+                        products: [],
+                        total: 0,
+                        vatAmount: 0
+                    };
+                    
+                    alert('Чек сохранен и добавлен в историю!');
+                };
+
+                // Генерация PDF чека
+                const generatePDF = (receiptData) => {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+                    
+                    // Логотип компании
+                    if (company.value.logoData) {
+                        doc.addImage(company.value.logoData, 'JPEG', 15, 10, 90, 10);
+                    }
+                    
+                    // Заголовок
+                    
+                    // Информация о компании
+                    doc.setFontSize(10);
+                    doc.text(`Company: ${company.value.fullName}`, 15, 30);
+                    doc.text(`INN: ${company.value.taxId}`, 15, 35);
+                    doc.text(`Adress: ${company.value.calculationAddress}`, 15, 40);
+                    doc.text(`Nalogooblagenie: ${company.value.taxSystem}`, 15, 45);
+                    
+                    // Информация о чеке
+                    doc.text(`Number of Check: ${receiptData.number}`, 15, 55);
+                    doc.text(`Date: ${receiptData.date}`, 15, 60);
+                    doc.text(`Time: ${receiptData.time}`, 15, 65);
+
+                    // Обработка номера телефона
+                    let phoneText = 'not specified';
+                    if (receiptData.clientPhone) {
+                        // Удаляем все нецифровые символы, кроме плюса
+                        const cleanedPhone = receiptData.clientPhone.replace(/[^\d+]/g, '');
+                        
+                        // Если номер начинается с +7 или 8, оставляем 11 цифр
+                        if (/^(\+7|8|7)/.test(cleanedPhone)) {
+                            const digits = cleanedPhone.replace(/\D/g, '').slice(-11);
+                            phoneText = '+7' + digits.slice(1);
+                        }
+                        // Если номер короче 11 цифр, оставляем как есть
+                        else if (cleanedPhone.length > 0) {
+                            phoneText = cleanedPhone;
+                        }
+                    }
+                    doc.text(`Telephone: ${phoneText}`, 15, 70);
+                    // Таблица товаров
+                    const headers = [['N', 'Name', 'Q', 'Cost', 'Sum']];
+                    const productsData = receiptData.products.map((product, index) => [
+                        index + 1,
+                        product.name,
+                        `${product.quantity}`,
+                        `${product.price.toFixed(2)} rub`,
+                        `${(product.price * product.quantity).toFixed(2)} rub`
+                    ]);
+                    
+                    doc.autoTable({
+                        startY: 80,
+                        head: headers,
+                        body: productsData,
+                        margin: { left: 15 },
+                        styles: { fontSize: 8 },
+                        columnStyles: {
+                            0: { cellWidth: 10 },
+                            1: { cellWidth: 80 },
+                            2: { cellWidth: 20 },
+                            3: { cellWidth: 30 },
+                            4: { cellWidth: 30 }
+                        }
+                    });
+                    
+                    // Итоговая информация
+                    const finalY = doc.lastAutoTable.finalY + 10;
+                    
+                    if (receiptData.discount > 0) {
+                        doc.text(`Skidka: ${receiptData.discount}% (${discountAmount.value.toFixed(2)} rub)`, 15, finalY);
+                    }
+                    
+                    doc.setFontSize(12);
+                    doc.text(`Itogo: ${receiptData.total.toFixed(2)} rub`, 15, finalY + 10);
+                    doc.text(`Summary: ${finalAmount.value.toFixed(2)} rub`, 15, finalY + 15);
+                    doc.setFontSize(10);
+                    doc.text(`Type of payment: ${receiptData.paymentType === 'приход' ? 'Income' : 
+                              receiptData.paymentType === 'возврат прихода' ? 'Income return' :
+                              receiptData.paymentType === 'расход' ? 'Expense' : 
+                              'Expense return'}`, 15, finalY + 30);
+                    
+                    // Подпись и печать
+                    
+                    // Сохраняем PDF
+                    doc.save(`Чек_${receiptData.number}_${receiptData.date.replace(/\./g, '-')}.pdf`);
+                };
+                
+                // Скачивание чека из истории
+                // Скачивание чека из истории (PDF или PNG)
+                const downloadHistoryReceipt = async (index, format = 'pdf') => {
+                    const receiptData = receiptHistory.value[index];
+                    
+                    if (format === 'pdf') {
+                        generatePDF(receiptData);
+                    } else if (format === 'png') {
+                        // Сначала генерируем PDF
+                        const { jsPDF } = window.jspdf;
+                        const doc = new jsPDF();
+                        
+                        // Здесь должна быть та же логика генерации PDF, что и в generatePDF()
+                        // Логотип компании
+                        if (company.value.logoData) {
+                            doc.addImage(company.value.logoData, 'JPEG', 15, 10, 110, 15);
+                        }
+                        
+                        // Информация о компании
+                        doc.setFontSize(10);
+                        doc.text(`Individual Predprinimatel: ${company.value.fullName}`, 15, 30);
+                        doc.text(`INN: ${company.value.taxId}`, 15, 35);
+                        doc.text(`Adress: ${company.value.calculationAddress}`, 15, 40);
+                        doc.text(`Nalogooblagenie: ${company.value.taxSystem}`, 15, 45);
+                        
+                        // Информация о чеке
+                        doc.text(`Number of Check: ${receiptData.number}`, 15, 55);
+                        doc.text(`Date: ${receiptData.date}`, 15, 60);
+                        doc.text(`Time: ${receiptData.time}`, 15, 65);
+
+                        // Обработка номера телефона
+                        let phoneText = 'not specified';
+                        if (receiptData.clientPhone) {
+                            const cleanedPhone = receiptData.clientPhone.replace(/[^\d+]/g, '');
+                            if (/^(\+7|8|7)/.test(cleanedPhone)) {
+                                const digits = cleanedPhone.replace(/\D/g, '').slice(-11);
+                                phoneText = '+7' + digits.slice(1);
+                            }
+                            else if (cleanedPhone.length > 0) {
+                                phoneText = cleanedPhone;
+                            }
+                        }
+                        doc.text(`Telephone: ${phoneText}`, 15, 70);
+                        
+                        // Таблица товаров
+                        const headers = [['N', 'Name', 'Q', 'Cost', 'Sum']];
+                        const productsData = receiptData.products.map((product, index) => [
+                            index + 1,
+                            product.name,
+                            `${product.quantity} ${product.unit}`,
+                            `${product.price.toFixed(2)} rub`,
+                            `${(product.price * product.quantity).toFixed(2)} rub`
+                        ]);
+                        
+                        doc.autoTable({
+                            startY: 80,
+                            head: headers,
+                            body: productsData,
+                            margin: { left: 15 },
+                            styles: { fontSize: 8 },
+                            columnStyles: {
+                                0: { cellWidth: 10 },
+                                1: { cellWidth: 80 },
+                                2: { cellWidth: 20 },
+                                3: { cellWidth: 30 },
+                                4: { cellWidth: 30 }
+                            }
+                        });
+                        
+                        // Итоговая информация
+                        const finalY = doc.lastAutoTable.finalY + 10;
+                        
+                        if (receiptData.discount > 0) {
+                            doc.text(`Skidka: ${receiptData.discount}% (${discountAmount.value.toFixed(2)} rub)`, 15, finalY);
+                        }
+                        
+                        doc.setFontSize(12);
+                        doc.text(`Itogo: ${receiptData.total.toFixed(2)} rub`, 15, finalY + 10);
+                        doc.text(`Summary: ${finalAmount.value.toFixed(2)} rub`, 15, finalY + 15);
+                        doc.setFontSize(10);
+                        doc.text(`Type of payment: ${receiptData.paymentType === 'приход' ? 'Income' : 
+                                receiptData.paymentType === 'возврат прихода' ? 'Income return' :
+                                receiptData.paymentType === 'расход' ? 'Expense' : 
+                                'Expense return'}`, 15, finalY + 30);
+                        
+                        // Подпись и печать
+                        doc.text('Director: _________________', 15, finalY + 40);
+                        if (company.value.stampData) {
+                            doc.addImage(company.value.stampData, 'JPEG', 140, finalY + 30, 50, 30);
+                        }
+                        
+                        // Получаем PDF как blob
+                        const pdfBlob = doc.output('blob');
+                        
+                        // Конвертируем в PNG
+                        const pngBlob = await convertPdfToPng(pdfBlob);
+                        
+                        // Создаем ссылку для скачивания
+                        const url = URL.createObjectURL(pngBlob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `Чек_${receiptData.number}_${receiptData.date.replace(/\./g, '-')}.png`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }
+                };
+                
+                // Удаление чека из истории
+                const deleteReceipt = (index) => {
+                    if (confirm('Удалить этот чек из истории?')) {
+                        receiptHistory.value.splice(index, 1);
+                        localStorage.setItem('receiptHistory', JSON.stringify(receiptHistory.value));
+                    }
+                };
+                
+                // Экспорт всех чеков в ZIP
+                const exportAllReceipts = async (format = 'pdf') => {
+                    if (receiptHistory.value.length === 0) {
+                        alert('Нет чеков для экспорта');
+                        return;
+                    }
+                    
+                    const { jsPDF } = window.jspdf;
+                    const JSZip = window.JSZip;
+                    const zip = new JSZip();
+                    
+                    // Добавляем задержку для асинхронных операций
+                    const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+                    
+                    for (let i = 0; i < receiptHistory.value.length; i++) {
+                        const receipt = receiptHistory.value[i];
+                        const doc = new jsPDF();
+                        
+                        // Здесь должна быть та же логика генерации PDF, что и в generatePDF()
+                        // ...
+                        
+                        if (format === 'pdf') {
+                            const pdfData = doc.output('arraybuffer');
+                            const fileName = `Чек_${receipt.number}_${receipt.date.replace(/\./g, '-')}.pdf`;
+                            zip.file(fileName, pdfData);
+                        } else if (format === 'png') {
+                            const pdfBlob = doc.output('blob');
+                            try {
+                                const pngBlob = await convertPdfToPng(pdfBlob);
+                                const fileName = `Чек_${receipt.number}_${receipt.date.replace(/\./g, '-')}.png`;
+                                zip.file(fileName, pngBlob);
+                            } catch (error) {
+                                console.error(`Ошибка при конвертации чека ${receipt.number}:`, error);
+                            }
+                        }
+                    }
+                    
+                    // Генерируем и скачиваем ZIP
+                    const content = await zip.generateAsync({ type: 'blob' });
+                    const url = URL.createObjectURL(content);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `Чеки_${format}_${formatDate(new Date())}.zip`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                };
+                
+                // Удаление всех чеков
+                const deleteAllReceipts = () => {
+                    if (confirm('Удалить всю историю чеков? Это действие нельзя отменить.')) {
+                        receiptHistory.value = [];
+                        localStorage.removeItem('receiptHistory');
+                    }
+                };
+                
+                // Инициализация при загрузке
+                checkAuth();
+                
+                return {
+                    authenticated,
+                    password,
+                    authError,
+                    company,
+                    productCategories,
+                    receipt,
+                    receiptHistory,
+                    discountAmount,
+                    finalAmount,
+                    amountInWords,
+                    
+                    // Methods
+                    login,
+                    logout,
+                    updateProductPrice,
+                    updateBasePriceFromTotal,
+                    formatPrice,
+                    addProductToReceipt,
+                    increaseQuantity,
+                    decreaseQuantity,
+                    removeProduct,
+                    updateReceiptTotal,
+                    applyCustomDiscount,
+                    setCurrentDate,
+                    editDate,
+                    handleLogoUpload,
+                    handleStampUpload,
+                    toggleCategory,
+                    formatPhone,
+                    saveCompanySettings,
+                    saveReceipt,
+                    downloadHistoryReceipt,
+                    deleteReceipt,
+                    exportAllReceipts,
+                    deleteAllReceipts
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
