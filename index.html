@@ -998,8 +998,12 @@
                 };
 
                 // Форматирование цены
+                // Добавьте эту функцию в ваш компонент (в setup())
+            // Добавьте эту функцию в ваш компонент (в setup())
                 const formatPrice = (price) => {
-                    return parseFloat(price).toFixed(2);
+                // Преобразуем число в строку и убираем лишние нули и точку, если нужно
+                const formatted = parseFloat(price.toFixed(2)).toString();
+                return formatted.endsWith('.00') ? formatted.slice(0, -3) : formatted;
                 };
 
                 // Добавление товара в чек
@@ -1354,8 +1358,8 @@
                         index + 1,
                         product.name,
                         `${product.quantity}`,
-                        `${product.price.toFixed(2)} rub`,
-                        `${(product.price * product.quantity).toFixed(2)} rub`
+                        `${product.price} rub`,
+                        `${(product.price * product.quantity)} rub`
                     ]);
                     
                     doc.autoTable({
@@ -1377,12 +1381,12 @@
                     const finalY = doc.lastAutoTable.finalY + 10;
                     
                     if (receiptData.discount > 0) {
-                        doc.text(`Skidka: ${receiptData.discount}% (${discountAmount.value.toFixed(2)} rub)`, 15, finalY);
+                        doc.text(`Skidka: ${receiptData.discount}% (${discountAmount.value} rub)`, 15, finalY);
                     }
                     
                     doc.setFontSize(12);
-                    doc.text(`Itogo: ${receiptData.total.toFixed(2)} rub`, 15, finalY + 10);
-                    doc.text(`Summary: ${finalAmount.value.toFixed(2)} rub`, 15, finalY + 15);
+                    doc.text(`Itogo: ${receiptData.total} rub`, 15, finalY + 10);
+                    doc.text(`Summary: ${finalAmount.value} rub`, 15, finalY + 15);
                     doc.setFontSize(10);
                     doc.text(`Type of payment: ${receiptData.paymentType === 'приход' ? 'Income' : 
                               receiptData.paymentType === 'возврат прихода' ? 'Income return' :
