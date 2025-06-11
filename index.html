@@ -229,6 +229,51 @@
             padding: 15px;
             background: #f9f9f9;
         }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            color: white;
+            z-index: 1000;
+            animation: slideIn 0.3s, fadeOut 0.5s 2.5s;
+        }
+
+            .notification.error {
+            background-color: #ff4444;
+        }
+
+            .notification.success {
+            background-color: #00C851;
+        }
+
+            @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+            @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        .price-error {
+            color: red;
+            background-color: #ffeeee;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ffcccc;
+            margin-top: 5px;
+            font-size: 14px;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
         
         .history-item {
             padding: 10px;
@@ -387,10 +432,11 @@
                             <button 
                                 @click.stop="addProductToReceipt(product)" 
                                 class="add-btn"
-                                :disabled="!product.weights || product.weights.length === 0"
+                                :disabled="!product.weights || product.weights.length === 0 || !product.currentPrice || product.currentPrice <= 0"
                             >
                                 Добавить в чек
                             </button>
+                            <div v-if="priceError" class="price-error">{{ priceError }}</div>
                         </div>
                     </div>
                 </div>
@@ -594,7 +640,8 @@
                                 weights: [
                                     {value: 0.7, label: '700g'},
                                     {value: 1, label: '1000g'},
-                                    {value: 1.5, label: '1500g'}
+                                    {value: 1.5, label: '1500g'},
+                                    {value: 1.7, label: '1700g'}
                                 ], 
                                 selectedWeightIndex: 0,
                                 currentPrice: 0, // 700 * 0.7
@@ -960,6 +1007,8 @@
                 // История чеков
                 const receiptHistory = ref([]);
 
+                const priceError = ref(null);
+
                 // Функция для форматирования даты в ДД.ММ.ГГГГ
                 function formatDate(date) {
                     const day = String(date.getDate()).padStart(2, '0');
@@ -989,8 +1038,27 @@
 
                 // Обновление базовой цены при ручном изменении итоговой цены
                 const updateBasePriceFromTotal = (event, product) => {
-                    const newTotal = parseFloat(event.target.value);
-                    if (isNaN(newTotal)) return;
+                    const inputValue = event.target.value;
+                    
+                    // Если поле пустое, сбрасываем цену
+                    if (inputValue === '') {
+                        product.currentPrice = '';
+                        return;
+                    }
+                    
+                    const newTotal = parseFloat(inputValue);
+                    
+                    // Если введено не число
+                    if (isNaN(newTotal)) {
+                        product.currentPrice = '';
+                        return;
+                    }
+                    
+                    // Если число отрицательное
+                    if (newTotal <= 0) {
+                        product.currentPrice = '';
+                        return;
+                    }
                     
                     const weight = product.weights[product.selectedWeightIndex].value;
                     product.basePrice = newTotal / weight;
@@ -1008,6 +1076,21 @@
 
                 // Добавление товара в чек
                 const addProductToReceipt = (product) => {
+                    // Проверка, что цена указана и валидна
+                    if (!product.currentPrice || isNaN(product.currentPrice)) {
+                        priceError.value = 'Ошибка: Укажите корректную цену товара!';
+                        setTimeout(() => { priceError.value = null; }, 3000); // Автоматически скрываем через 3 секунды
+                        return;
+                    }
+                    
+                    if (product.currentPrice <= 0) {
+                        priceError.value = 'Ошибка: Цена должна быть больше нуля!';
+                        setTimeout(() => { priceError.value = null; }, 3000);
+                        return;
+                    }
+
+                    priceError.value = null; // Сбрасываем ошибку, если все в порядке
+                    
                     const weight = product.weights[product.selectedWeightIndex];
                     const productName = `${product.name} (${weight.label.replace(/\(|\)/g, '')})`;
                     const price = product.currentPrice;
@@ -1514,6 +1597,23 @@
                         receiptHistory.value.splice(index, 1);
                         localStorage.setItem('receiptHistory', JSON.stringify(receiptHistory.value));
                     }
+                };
+
+                const notification = ref({
+                    show: false,
+                    message: '',
+                    type: 'error' // может быть 'error' или 'success'
+                });
+
+                const showNotification = (message, type = 'error') => {
+                    notification.value = {
+                        show: true,
+                        message,
+                        type
+                    };
+                    setTimeout(() => {
+                        notification.value.show = false;
+                    }, 3000);
                 };
                 
                 // Экспорт всех чеков в ZIP
