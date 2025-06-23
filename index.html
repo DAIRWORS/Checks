@@ -559,7 +559,7 @@
                     logoData: 'icons/icon-192x192.png',
                     stampData: 'icons/image282.png',
                     fullName: 'VELICHESTVO PIZZA',
-                    taxId: '561001215161',
+                    taxId: '561001215161 / Kalyakina E. A.',
                     calculationAddress: 'Orenburg, Zagorodnoe shosse 24',
                     taxSystem: 'CNO : PSN'
                 });
@@ -914,7 +914,7 @@
                                     {value: 1.1, label: '1.1kg'},
                                 ], 
                                 selectedWeightIndex: 0,
-                                currentPrice: 800 // 180 * 1.1
+                                currentPrice: 0 // 180 * 1.1
                             },
                             { 
                                 name: 'Kyrinye krylyshki', 
@@ -923,7 +923,7 @@
                                     {value: 0.6, label: '0.6kg'},
                                 ], 
                                 selectedWeightIndex: 0,
-                                currentPrice: 800 // 180 * 0.6
+                                currentPrice: 0 // 180 * 0.6
                             },
                             { 
                                 name: 'Kartofel Fri', 
@@ -942,7 +942,7 @@
                                     {value: 0.4, label: '400g'}
                                 ], 
                                 selectedWeightIndex: 0,
-                                currentPrice: 750 // 400 * 0.4
+                                currentPrice: 0 // 400 * 0.4
                             },
                             { 
                                 name: 'Lzaznya "Kyrinaya"', 
@@ -951,7 +951,7 @@
                                     {value: 0.4, label: '400g'}
                                 ], 
                                 selectedWeightIndex: 0,
-                                currentPrice: 600 // 400 * 0.4
+                                currentPrice: 0 // 400 * 0.4
                             },
                             { 
                                 name: 'Lazanya "Gribnaya"', 
@@ -960,7 +960,7 @@
                                     {value: 0.4, label: '400g'}
                                 ], 
                                 selectedWeightIndex: 0,
-                                currentPrice: 600 // 400 * 0.4
+                                currentPrice: 0 // 400 * 0.4
                             }
                         ]
                     },
@@ -975,7 +975,7 @@
                                     {value: 0.3, label: '300g'}
                                 ], 
                                 selectedWeightIndex: 0,
-                                currentPrice: 400 // 300 * 0.3
+                                currentPrice: 0 // 300 * 0.3
                             },
                             { 
                                 name: 'Salad "Ceaser" s krevetkami', 
@@ -984,7 +984,7 @@
                                     {value: 0.3, label: '300g'}
                                 ], 
                                 selectedWeightIndex: 0,
-                                currentPrice: 500 // 350 * 0.3
+                                currentPrice: 0 // 350 * 0.3
                             }
                         ]
                     }
@@ -1033,7 +1033,7 @@
                 // Обновление цены продукта при изменении веса или базовой цены
                 const updateProductPrice = (product) => {
                     const weight = product.weights[product.selectedWeightIndex].value;
-                    product.currentPrice = product.basePrice * weight;
+                    product.currentPrice = 0;
                 };
 
                 // Обновление базовой цены при ручном изменении итоговой цены
@@ -1414,7 +1414,7 @@
                     doc.text(`Nalogooblagenie: ${company.value.taxSystem}`, 15, 45);
                     
                     // Информация о чеке
-                    doc.text(`Number of Check: ${receiptData.number}`, 15, 55);
+                    doc.text(`Kvitancia: ${receiptData.number}`, 15, 55);
                     doc.text(`Date: ${receiptData.date}`, 15, 60);
                     doc.text(`Time: ${receiptData.time}`, 15, 65);
 
