@@ -507,12 +507,12 @@
                     </div>
                 </div>
                 
-                <!--<div class="total-section">
+                <div class="total-section">
                     <h3>Итого: {{ receipt.total.toFixed(2) }} ₽</h3>
                     <p v-if="receipt.discount > 0">Скидка: {{ receipt.discount }}% ({{ discountAmount.toFixed(2) }} ₽)</p>
                     <h3>К оплате: {{ finalAmount.toFixed(2) }} ₽</h3>
                     <p>{{ amountInWords }}</p>
-                </div>-->
+                </div>
                 
                 <!--<div class="signature-area">
                     <p>Генеральный директор: _________________</p>
@@ -557,7 +557,7 @@
                 // Данные компании
                 const company = ref({
                     logoData: 'icons/icon-192x192.png',
-                    stampData: 'icons/shtamp.png',
+                    stampData: 'icons/image282.png',
                     fullName: 'VELICHESTVO PIZZA',
                     taxId: '561001215161',
                     calculationAddress: 'Orenburg, Zagorodnoe shosse 24',
@@ -1180,7 +1180,7 @@
                     let result = '';
                     
                     if (rubles === 0) {
-                        result = 'ноль рублей';
+                        result = '0 рублей ';
                     } else {
                         if (rubles >= 1000) {
                             result += 'большая сумма ';
@@ -1508,7 +1508,7 @@
                         doc.text(`Nalogooblagenie: ${company.value.taxSystem}`, 15, 45);
                         
                         // Информация о чеке
-                        doc.text(`Number of Check: ${receiptData.number}`, 15, 55);
+                        doc.text(`Number of Kvitancia: ${receiptData.number}`, 15, 55);
                         doc.text(`Date: ${receiptData.date}`, 15, 60);
                         doc.text(`Time: ${receiptData.time}`, 15, 65);
 
